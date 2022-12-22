@@ -28,7 +28,7 @@ Scrolling shooter game for EdgeTX/OpenTX radios
 
 # Installation
 
-- Download the `GAMES` folder from this repo
+- [Download the Game files](https://github.com/timmalahov/galuaxian/releases/download/untagged-3a7d089afcbd6b631552/GaLuaxian.zip) from the latest [Release](https://github.com/timmalahov/galuaxian/releases)
 - Put it anywhere on your SD card. I recommend the `SCRIPTS` folder.
   - If you want it to be available in the SYS/TOOLS menu (e.g. on Radiomaster TX16s), you can put content of `GAMES` folder at `/SCRIPTS/TOOLS/`
 
