@@ -14,6 +14,10 @@ Scrolling shooter game for EdgeTX/OpenTX radios
 
 </details>
 
+# Videos
+[![Tango 2 gameplay](https://img.youtube.com/vi/AjwMtNkSNuo/0.jpg)](https://www.youtube.com/watch?v=AjwMtNkSNuo)
+[![Radiomaster TX16S gameplay](https://img.youtube.com/vi/VeerjjExnzo/0.jpg)](https://www.youtube.com/watch?v=VeerjjExnzo)
+
 # Table of contents
 
 - [Installation](#installation)
@@ -44,7 +48,7 @@ Scrolling shooter game for EdgeTX/OpenTX radios
 - **Low FPS** - Lower FPS might help on devices with LCD that might not be perfect to display dynamic pictures
 - **Target side motion** - Whether enemy should strafe or go in straight trajectory
 - **Fancy projectile** - More sophisticated looking projectiles
-- **Easy mode** - Less enemies with lower speed
+- **Easy mode** - Fewer enemies with lower speed
 - **Low Quality** - Primitive renders instead of bitmap pictures. On older devices turned on by default and cannot be changed.
 
 # Gamplay
