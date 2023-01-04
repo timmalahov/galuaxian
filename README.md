@@ -16,7 +16,7 @@ Scrolling shooter game for EdgeTX/OpenTX radios
 
 # Videos
 [![Tango 2 gameplay](https://img.youtube.com/vi/AjwMtNkSNuo/0.jpg)](https://www.youtube.com/watch?v=AjwMtNkSNuo)
-[![Radiomaster TX16S gameplay](https://img.youtube.com/vi/VeerjjExnzo/0.jpg)](https://www.youtube.com/watch?v=VeerjjExnzo)
+[![Radiomaster TX16S gameplay](https://img.youtube.com/vi/zuiNHMiexzg/0.jpg)](https://youtu.be/zuiNHMiexzg)
 
 # Table of contents
 
