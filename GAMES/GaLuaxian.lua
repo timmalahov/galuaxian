@@ -13,9 +13,7 @@ local shipPosition = {x = 0, y = 0}
 local SCALE = 1
 local actionAreaWidthStart = 0
 local actionAreaHeightStart = LCD_H * 0.25
-local tick = 0
-local tickCount = 0
-local backgroundSpeed = 1
+local backgroundSpeed = 2
 local projectileCount = 3 -- 6
 local targetCount = 4 -- 10
 local targetWidth = 16
@@ -37,6 +35,20 @@ local menuPosition = 0
 local menuPadding = 2
 local menuOpened = false -- dirty hack to avoid EVT_ENTER_BREAK trigger settings change on initial menu open
 
+-- Returns color flag
+local function getActiveColor(accent)
+  if SCALE <= 1 or settings.lowQuality then
+    return 0
+  end
+  if accent == "RED" then
+    return RED
+  end
+  if accent == "YELLOW" then
+    return RED
+  end
+  return WHITE
+end
+
 local function loadBestResult()
   local f = io.open(bestResultPath, "r")
   if f == nil then
@@ -47,9 +59,9 @@ local function loadBestResult()
 end
 
 local function saveBestResult(result)
-  -- local f = io.open(bestResultPath, "w")
-  -- io.write(f, string.format("%3d", result))
-  -- io.close(f)
+   local f = io.open(bestResultPath, "w")
+   io.write(f, string.format("%3d", result))
+   io.close(f)
 end
 
 local function initWithScale(scale)
@@ -93,7 +105,7 @@ local function init_func()
   bestResult = loadBestResult()
   hits = 0
   gameStarted = false
-  
+
   if LCD_W >= 480 then
     SCALE = 2
   end
@@ -136,15 +148,16 @@ local function drawProjectile(projectile, x, y)
     projectile.y = projectile.y + projectile.velocity
     projectile.travelDistance = projectile.travelDistance + projectile.velocity * -1 -- because of negative velocity
   end
-  
-  if settings.fancyProjectile then
-    lcd.drawLine(projectile.x, projectile.y, projectile.x + projectileWidth / 2, projectile.y + projectileLength, SOLID, FORCE)
-    lcd.drawLine(projectile.x + projectileWidth / 2, projectile.y + projectileLength, projectile.x - projectileWidth / 2, projectile.y + projectileLength, SOLID, FORCE)
-    lcd.drawLine(projectile.x - projectileWidth / 2, projectile.y + projectileLength, projectile.x, projectile.y, SOLID, FORCE)
+
+  if settings.fancyProjectile then -- /_|_\
+    lcd.drawLine(projectile.x, projectile.y, projectile.x + projectileWidth / 2, projectile.y + projectileLength, SOLID, getActiveColor()) -- \
+    lcd.drawLine(projectile.x + projectileWidth / 2, projectile.y + projectileLength, projectile.x - projectileWidth / 2, projectile.y + projectileLength, SOLID, getActiveColor("YELLOW")) -- __
+    lcd.drawLine(projectile.x - projectileWidth / 2, projectile.y + projectileLength, projectile.x, projectile.y, SOLID, getActiveColor()) -- /
+    lcd.drawLine(projectile.x, projectile.y, projectile.x, projectile.y + projectileLength, SOLID, getActiveColor("RED")) -- |
     return
   end
-  
-  lcd.drawRectangle(projectile.x - projectileWidth / 2, projectile.y, projectileWidth, projectileLength)
+
+  lcd.drawRectangle(projectile.x - projectileWidth / 2, projectile.y, projectileWidth, projectileLength, getActiveColor())
 end
 
 local function drawShip(x, y)
@@ -216,12 +229,12 @@ local function detectOverlap(xl1, yl1, xl2, yl2, xr1, yr1, xr2, yr2) -- TODO pas
 
   -- If one rectangle is on left side of other
   if xl1 > xr2 or xl2 > xr1 then
-      return false
+    return false
   end
- 
+
   -- If one rectangle is above other
   if yr1 > yl2 or yr2 > yl1 then
-      return false
+    return false
   end
   return true
 end
@@ -240,10 +253,10 @@ local function drawTargets()
 
     for j = 0, projectileCount do -- projectile/target collision detection, forgiving hitboxes
       if not targets[i].dead
-      and projectiles[j].x >= targets[i].x - 10
-      and projectiles[j].x + projectileWidth <= targets[i].x + targetWidth + 10
-      and projectiles[j].y >= targets[i].y - (projectileLength + projectiles[j].velocity * -1) -- adjustement for projectile skips
-      and projectiles[j].y <= targets[i].y + targetHeight + projectiles[j].velocity * -1 then
+              and projectiles[j].x >= targets[i].x - 10
+              and projectiles[j].x + projectileWidth <= targets[i].x + targetWidth + 10
+              and projectiles[j].y >= targets[i].y - (projectileLength + projectiles[j].velocity * -1) -- adjustement for projectile skips
+              and projectiles[j].y <= targets[i].y + targetHeight + projectiles[j].velocity * -1 then
         targets[i].dead = true
         targets[i].sideVelocity = targets[i].sideVelocity * -1
         playTone(450, 50, 0)
@@ -252,14 +265,14 @@ local function drawTargets()
     end
 
     if not targets[i].dead and (detectOverlap(
-      targets[i].x + shipCollisionMargin, -- l1
-      targets[i].y,
-      shipPosition.x, -- l2
-      shipPosition.y + shipCollisionMargin,
-      targets[i].x + targetWidth - shipCollisionMargin, -- r1
-      targets[i].y - targetHeight,
-      shipPosition.x + shipWidth - shipCollisionMargin, -- r2
-      shipPosition.y + shipCollisionMargin - shipHeight
+            targets[i].x + shipCollisionMargin, -- l1
+            targets[i].y,
+            shipPosition.x, -- l2
+            shipPosition.y + shipCollisionMargin,
+            targets[i].x + targetWidth - shipCollisionMargin, -- r1
+            targets[i].y - targetHeight,
+            shipPosition.x + shipWidth - shipCollisionMargin, -- r2
+            shipPosition.y + shipCollisionMargin - shipHeight
     )) then
       gameOver = true
       playHaptic(50, 0, PLAY_NOW)
@@ -291,63 +304,63 @@ local function renderHome(event)
     if gameStarted then
       lcd.drawText(LCD_W / 2 - 40, LCD_H / 4, "Game Over", BOLD + MIDSIZE )
       lcd.drawText(LCD_W / 2 - 40, LCD_H * 2 / 4, string.format("Points: %.0f", hits), BOLD)
-      
+
       if (not bestResult) or (hits > bestResult) then
         saveBestResult(hits)
       end
-    else 
+    else
       lcd.drawScreenTitle("[GaLuaxian]", 0, 0)
       lcd.drawText(LCD_W / 2 - 40, LCD_H / 4, "SHOOT 'EM UP!")
       if bestResult then
         lcd.drawText(LCD_W / 2 - 40, LCD_H / 4 + 12, string.format("Best result: %.0f", bestResult))
       end
     end
-  
+
     lcd.drawText(4, LCD_H - 20 , "Press [Enter] to start", BOLD + BLINK)
     lcd.drawText(10, LCD_H - 10 , "(Hold for settings)", BOLD)
     return 0
   else -- big screen size
     if gameStarted then
-      lcd.drawText(LCD_W / 2 - 80, LCD_H / 2 - 40, "Game Over", BOLD + MIDSIZE )
-      lcd.drawText(LCD_W / 2 - 80, LCD_H * 2 / 3 - 40, string.format("Points: %.0f", hits), BOLD + SMLSIZE)
-      
+      lcd.drawText(LCD_W / 2 - 80, LCD_H / 2 - 40, "Game Over", BOLD + MIDSIZE + getActiveColor("RED") )
+      lcd.drawText(LCD_W / 2 - 80, LCD_H * 2 / 3 - 40, string.format("Points: %.0f", hits), BOLD + SMLSIZE + getActiveColor())
+
       if (not bestResult) or (hits > bestResult) then
         saveBestResult(hits)
       end
-    else 
-      lcd.drawRectangle(LCD_W / 2 - 90, LCD_H / 2 - 48, 170, 60, SOLID)
-      lcd.drawRectangle(LCD_W / 2 - 88, LCD_H / 2 - 46, 170, 60, SOLID)
+    else
+      lcd.drawRectangle(LCD_W / 2 - 90, LCD_H / 2 - 48, 170, 60, SOLID + getActiveColor())
+      lcd.drawRectangle(LCD_W / 2 - 88, LCD_H / 2 - 46, 170, 60, SOLID + getActiveColor("YELLOW"))
 
       -- lcd.drawLine(LCD_W / 2 - 95, LCD_H / 2 + 18, LCD_W / 2 - 90 + 170 + 5, LCD_H / 2 + 18, SOLID, FORCE)
       -- lcd.drawLine(LCD_W / 2 - 100, LCD_H / 2 + 23, LCD_W / 2 - 90 + 170 + 10, LCD_H / 2 + 23, SOLID, FORCE)
-      
-      lcd.drawText(LCD_W / 2 - 70, LCD_H / 2 - 40, "Galuaxian", BOLD + MIDSIZE )
-      lcd.drawText(LCD_W / 2 - 70, LCD_H / 2 - 10, "SHOOT 'EM UP!", SMLSIZE )
+
+      lcd.drawText(LCD_W / 2 - 75, LCD_H / 2 - 40, "Galuaxian", BOLD + MIDSIZE + getActiveColor() )
+      lcd.drawText(LCD_W / 2 - 75, LCD_H / 2 - 10, "SHOOT 'EM UP!", SMLSIZE + getActiveColor())
       if bestResult then
-        lcd.drawText(LCD_W / 2 - 60, LCD_H / 2 + 60, string.format("Best result: %.0f", bestResult), SMLSIZE )
+        lcd.drawText(LCD_W / 2 - 60, LCD_H / 2 + 60, string.format("Best result: %.0f", bestResult), SMLSIZE + getActiveColor())
       end
     end
-  
-    lcd.drawText(LCD_W / 3 + 4, LCD_H - 53, "Press [Enter] to start", BOLD + BLINK)
-    lcd.drawText(LCD_W / 3, LCD_H - 30, "Hold [Enter] for settings", 0, BOLD)
+
+    lcd.drawText(LCD_W / 3 + 4, LCD_H - 53, "Press [Enter] to start", BOLD + BLINK + getActiveColor())
+    lcd.drawText(LCD_W / 3, LCD_H - 30, "Hold [Enter] for settings", BOLD + getActiveColor())
     return 0
   end
 end
 
 local function drawTick(x,y)
-  lcd.drawLine(x + menuPadding + 3, y + menuPadding + 5, x + 9, y + 13, SOLID, FORCE)
-  lcd.drawLine(x + 9, y + 13, x + 17, y + menuPadding + 3, SOLID, FORCE)
+  lcd.drawLine(x + menuPadding + 3, y + menuPadding + 5, x + 9, y + 13, SOLID, getActiveColor())
+  lcd.drawLine(x + 9, y + 13, x + 17, y + menuPadding + 3, SOLID, getActiveColor())
   -- bold
-  lcd.drawLine(x + menuPadding + 3, y + menuPadding + 6, x + 9, y + 14, SOLID, FORCE)
-  lcd.drawLine(x + 9, y + 14, x + 17, y + menuPadding + 4, SOLID, FORCE)
+  lcd.drawLine(x + menuPadding + 3, y + menuPadding + 6, x + 9, y + 14, SOLID, getActiveColor())
+  lcd.drawLine(x + 9, y + 14, x + 17, y + menuPadding + 4, SOLID, getActiveColor())
 end
 
 local function drawBooleanField(x,y, text, value) -- selected
-  lcd.drawText(x + menuPadding, y + menuPadding, text)
-  lcd.drawRectangle(LCD_W - menuPadding - 19, y + menuPadding, 19, 19)
-  lcd.drawRectangle(LCD_W - menuPadding - 18, y + menuPadding + 1, 17, 17)
+  lcd.drawText(x + menuPadding, y + menuPadding, text, getActiveColor())
+  lcd.drawRectangle(LCD_W - menuPadding - 19, y + menuPadding, 19, 19, getActiveColor())
+  lcd.drawRectangle(LCD_W - menuPadding - 18, y + menuPadding + 1, 17, 17, getActiveColor())
 
-  if value then 
+  if value then
     drawTick(LCD_W - 23, y + menuPadding)
   end
 end
@@ -364,7 +377,7 @@ local function drawLowScaleBooleanField(x,y, text, value) -- selected
   lcd.drawRectangle(LCD_W - menuPadding - 8, y + menuPadding, 8, 8)
   -- lcd.drawRectangle(LCD_W - menuPadding - 8, y + menuPadding + 1, 17, 17)
 
-  if value then 
+  if value then
     drawLowScaleTick(LCD_W - 10, y + menuPadding)
   end
 end
@@ -381,7 +394,7 @@ local function renderMenu(event)
     if menuPosition > menuItemsCount - 1 then
       menuPosition = 0
     end
-  end    
+  end
   if event == EVT_ENTER_BREAK and menuPage then -- very bad menu items handling
     if menuPosition == 0 and menuOpened then
       settings.lowFps = not settings.lowFps
@@ -406,14 +419,14 @@ local function renderMenu(event)
   end
 
   if SCALE > 1 then
-    lcd.drawFilledRectangle(0, 0, LCD_W, 40, 0, 0.5)
-    lcd.drawText(0, 0, "Settings",  BOLD + MIDSIZE + INVERS)
+    lcd.drawFilledRectangle(0, 0, LCD_W, 40, getActiveColor())
+    lcd.drawText(0, 0, "Settings",  BOLD + MIDSIZE + INVERS + getActiveColor())
     drawBooleanField(2,47,"Low FPS: ", settings.lowFps)
     drawBooleanField(2,76,"Target side motion: ", settings.targetSideMotion)
     drawBooleanField(2,105,"Fancy projectile: ", settings.fancyProjectile)
     drawBooleanField(2, 134,"Easy mode: ", settings.easyMode)
     drawBooleanField(2, 163,"Low Quality: ", settings.lowQuality)
-    lcd.drawRectangle(1, 46 + 29 * menuPosition, LCD_W - 1, 25, SOLID) -- selected field frame
+    lcd.drawRectangle(1, 46 + 29 * menuPosition, LCD_W - 1, 25, SOLID + getActiveColor()) -- selected field frame
     return 0
   end
 
@@ -444,7 +457,7 @@ local function run_func(event)
     if event == EVT_ENTER_BREAK and not menuPage then
       gameOver = false
       gameStarted = true
-      hits = 0  
+      hits = 0
       for i = 0, targetCount do
         targets[i].dead = true
       end
