@@ -27,8 +27,8 @@ Scrolling shooter game for EdgeTX/OpenTX radios
 - [Gamplay](#gamplay)
 
 # Installation
-
-- Download the `GAMES` folder from this repo
+[![Button Shield]](https://github.com/timmalahov/galuaxian/releases/download/v1.1.0/GaLuaxian.zip)
+- Download the `GAMES` folder from this repo (_hint: use the button above_)
 - Put it anywhere on your SD card. I recommend the `SCRIPTS` folder.
   - If you want it to be available in the SYS/TOOLS menu (e.g. on Radiomaster TX16s), you can put content of `GAMES` folder at `/SCRIPTS/TOOLS/`
 
@@ -59,3 +59,6 @@ Scrolling shooter game for EdgeTX/OpenTX radios
 
 
 :warning: _Everything you do is at your own risk_
+
+
+[Button Shield]: https://img.shields.io/badge/Download-37a779?style=for-the-badge
